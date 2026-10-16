@@ -1,0 +1,120 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Store Assistant</title>
+<style>
+:root{--bg:#f5f2ec;--ink:#1d1b18;--mute:#7a746a;--card:#fffdf9;--line:#e6e0d4;--ac:#1d6b57;--ac2:#e3efe9;--warn:#b4432f;--sh:0 1px 2px #0001,0 8px 24px -12px #0002}
+@media(prefers-color-scheme:dark){:root{--bg:#121211;--ink:#f1ede4;--mute:#9a9486;--card:#1c1b19;--line:#2c2a26;--ac:#46c29d;--ac2:#173229;--warn:#ef8a74;--sh:0 8px 24px -12px #000}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;display:flex;justify-content:center}
+.app{width:100%;max-width:620px;height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
+header{padding:18px 2px 10px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+h1{font:600 26px/1.1 ui-serif,"New York",Georgia,serif;margin:0;letter-spacing:-.01em}
+.sub{color:var(--mute);font-size:13px;margin-top:3px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:5px 11px;font-size:12.5px;color:var(--mute)}
+.chip b{color:var(--ink);font-weight:600}.dot{width:7px;height:7px;border-radius:50%;background:var(--ac)}
+.chip select{border:0;background:transparent;color:var(--ink);font:600 12.5px inherit;font-family:inherit;outline:0;cursor:pointer}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);background:var(--line);border-radius:12px;padding:3px;margin:6px 0 10px}
+.seg button{border:0;background:transparent;color:var(--mute);padding:9px 0;border-radius:9px;font:500 13.5px inherit;font-family:inherit;cursor:pointer;transition:.2s}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--sh)}
+main{flex:1;overflow-y:auto;padding:4px 2px 14px;scroll-behavior:smooth}
+.empty{text-align:center;color:var(--mute);margin-top:12vh;padding:0 24px}
+.empty .big{font:500 22px/1.3 ui-serif,Georgia,serif;color:var(--ink);margin-bottom:6px}
+.msg{display:flex;flex-direction:column;margin:10px 0;animation:in .35s ease both}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.msg.owner{align-items:flex-end}.msg.customer{align-items:flex-start}
+.meta{font-size:11.5px;color:var(--mute);margin:0 8px 3px;display:flex;gap:6px;align-items:center}
+.bub{max-width:86%;padding:11px 14px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh)}
+.owner .bub{background:var(--ac2);border-color:transparent;border-bottom-right-radius:5px}.customer .bub{border-bottom-left-radius:5px}
+.bub .tr{font-size:17px;font-weight:500}.bub .or{font-size:12.5px;color:var(--mute);margin-top:5px;padding-top:5px;border-top:1px dashed var(--line)}
+.play{border:0;background:var(--line);color:var(--ink);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:10px 0;box-shadow:var(--sh);animation:in .35s ease both}
+.receipt{border-style:dashed}.receipt h3{margin:0 0 2px;font:600 12px inherit;font-family:inherit;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}.line span:first-child{text-transform:capitalize}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px}.total b{font:600 32px ui-serif,Georgia,serif}
+.tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.tag{font-size:12px;background:var(--line);padding:3px 10px;border-radius:99px}
+.acts{display:flex;gap:8px;margin-top:14px}.acts button{flex:1;padding:11px;border-radius:11px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 14px inherit;font-family:inherit;cursor:pointer}
+.acts .p{background:var(--ac);border-color:var(--ac);color:#fff}.hint{font-size:12px;color:var(--mute);margin-top:10px;text-align:center}
+.ans{font:500 19px/1.4 ui-serif,Georgia,serif}.q{font-size:12.5px;color:var(--mute);margin-bottom:6px}
+.err{color:var(--warn)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0}.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.tile small{color:var(--mute);display:block;text-transform:capitalize}.tile b{font:600 24px ui-serif,Georgia,serif}
+table{width:100%;border-collapse:collapse;font-size:13.5px}td{padding:9px 4px;border-bottom:1px solid var(--line)}td:last-child{text-align:right;font-weight:600}
+.lbl{display:flex;justify-content:space-between;color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.07em;margin:16px 2px 6px}.lbl a{color:var(--ac);text-decoration:none}
+dock{display:block}.dock{padding:6px 0 14px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.mic{--lvl:0;position:relative;width:78px;height:78px;border-radius:50%;border:0;background:var(--ac);color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 10px 28px -8px var(--ac);transition:transform .15s}
+.mic:active{transform:scale(.95)}.mic::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ac);opacity:.25;transform:scale(calc(1 + var(--lvl)*1.1));transition:transform .08s}
+.mic svg{position:relative;width:30px;height:30px}.mic.rec{background:var(--warn);box-shadow:0 10px 28px -8px var(--warn)}.mic.rec::before{background:var(--warn)}
+.mic.busy{opacity:.6;pointer-events:none}
+.compose{display:flex;gap:8px;width:100%}.compose input{flex:1;padding:11px 15px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;outline:0}
+.compose input:focus{border-color:var(--ac)}.compose button{border:0;background:var(--ink);color:var(--bg);border-radius:99px;padding:0 18px;font:600 14px inherit;font-family:inherit;cursor:pointer}
+.status{font-size:12.5px;color:var(--mute);min-height:18px}
+.dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--mute);animation:b 1s infinite}.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes b{50%{transform:translateY(-4px);opacity:.4}}
+[hidden]{display:none!important}
+</style></head><body><div class="app">
+<header><div><h1 id="shop">Store Assistant</h1><div class="sub">Speak in any language. I'll handle the rest.</div></div>
+<div class="chips"><label class="chip"><span class="dot"></span>You <select id="ol"></select></label><div class="chip">Customer <b id="cl">auto</b></div></div></header>
+<div class="seg" id="seg"><button data-m="talk" class="on">Converse</button><button data-m="log">Log sale</button><button data-m="ask">Ask</button><button data-m="dash">Ledger</button></div>
+<main id="feed"></main><main id="ledger" hidden></main>
+<div class="dock" id="dock"><div class="status" id="st"></div>
+<button class="mic" id="mic" aria-label="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+<form class="compose" id="form"><input id="txt" placeholder="Or type in any language…" autocomplete="off"><button>Send</button></form></div>
+<audio id="au"></audio></div>
+<script>
+const N={"te-IN":"Telugu","hi-IN":"Hindi","ta-IN":"Tamil","kn-IN":"Kannada","ml-IN":"Malayalam","mr-IN":"Marathi","bn-IN":"Bengali","gu-IN":"Gujarati","pa-IN":"Punjabi","od-IN":"Odia","en-IN":"English"};
+const HINT={talk:["Just talk","Tap the mic. I'll detect the language and who's speaking, then translate and speak it aloud."],log:["Log a sale by voice","Say it naturally: “Ramesh ki 2 kilo chawal, 450 rupees, cash”."],ask:["Ask about your shop","Try “aaj ki sale kitni hui?” or “Ramesh ka udhaar kitna hai?”"]};
+const $=s=>document.querySelector(s),nm=c=>N[c]||"auto",esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let mode="talk",draft=null,rec=null;
+$("#ol").innerHTML=Object.entries(N).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+const api=async(p,fd)=>{const r=await fetch("/api/"+p,{method:"POST",body:fd});if(!r.ok){let m=await r.text();try{m=JSON.parse(m).detail||m}catch{}throw new Error(m)}return r.json()};
+const play=b=>{if(b){const a=$("#au");a.src="data:audio/wav;base64,"+b;a.play().catch(()=>{})}};
+async function load(){const s=await(await fetch("/api/settings")).json();$("#ol").value=s.owner_language;$("#cl").textContent=nm(s.customer_language);$("#shop").textContent=s.shop_name}
+$("#ol").onchange=async()=>{const f=new FormData();f.append("owner_language",$("#ol").value);await api("settings",f)};
+function empty(){const h=HINT[mode];$("#feed").innerHTML=`<div class="empty"><div class="big">${h[0]}</div>${h[1]}</div>`}
+function put(html){const f=$("#feed");f.querySelector(".empty")?.remove();f.insertAdjacentHTML("beforeend",html);f.lastElementChild.scrollIntoView({behavior:"smooth",block:"end"});return f.lastElementChild}
+$("#seg").onclick=e=>{const m=e.target.dataset.m;if(!m)return;mode=m;draft=null;document.querySelectorAll(".seg button").forEach(b=>b.classList.toggle("on",b===e.target));
+ const d=m=="dash";$("#feed").hidden=d;$("#ledger").hidden=!d;$("#dock").hidden=d;if(d)ledger();else{$("#feed").innerHTML="";empty()}};
+function bubble(r){const el=put(`<div class="msg ${r.speaker}"><div class="meta">${r.speaker=="owner"?"You":"Customer"} · ${nm(r.from)} → ${nm(r.to)} <button class="play">▶</button></div>
+ <div class="bub"><div class="tr">${esc(r.translated)}</div><div class="or">${esc(r.original)}</div></div></div>`);
+ el.querySelector(".play").onclick=()=>play(r.audio);}
+function receipt(r){if(!r.draft){put(`<div class="card"><div class="q">I need one more detail</div><div class="ans">${esc(r.clarify)}</div><div class="hint">Tap the mic and answer</div></div>`);return}
+ const d=r.draft;put(`<div class="card receipt"><h3>${esc(d.type.replace("_"," "))}${d.customer_name?" · "+esc(d.customer_name):""}</h3>
+ ${d.items.map(i=>`<div class="line"><span>${esc(i.name)}</span><span>${i.quantity} ${esc(i.unit)}</span></div>`).join("")}
+ <div class="total"><span>Total</span><b>₹${d.total_amount}</b></div><div class="tags"><span class="tag">${esc(d.payment_mode)}</span><span class="tag">${Math.round(d.confidence*100)}% sure</span></div>
+ <div class="acts"><button onclick="discard(this)">Discard</button><button class="p" onclick="save(this)">Save</button></div>
+ <div class="hint">Or say “yes” to save, or speak a correction</div></div>`)}
+async function save(b){const r=await fetch("/api/log/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(draft)});
+ if(r.ok){draft=null;b.closest(".card").innerHTML=`<div class="ans">✓ Saved</div><div class="acts"><button onclick="undo(this)">Undo</button></div>`}}
+function discard(b){draft=null;b.closest(".card").remove()}
+async function undo(b){const r=await(await fetch("/api/log/undo",{method:"POST"})).json();b.closest(".card").innerHTML=`<div class="q">${r.undone?"Removed ₹"+r.rupees:"Nothing to undo"}</div>`}
+async function handle(blob,text){
+ const f=new FormData();blob?f.append("audio",blob,"a.webm"):f.append("text",text);
+ const ph=put(`<div class="msg"><div class="bub dots"><span></span><span></span><span></span></div></div>`);$("#mic").classList.add("busy");$("#st").textContent="Listening to the language…";
+ try{let r;
+  if(mode=="talk"){r=await api("chat/auto",f);ph.remove();bubble(r);play(r.audio)}
+  else if(mode=="log"){if(draft)f.append("draft",JSON.stringify(draft));r=await api(draft?"log/correct":"log/parse",f);ph.remove();
+   if(r.saved){draft=null;put(`<div class="card"><div class="ans">✓ Saved</div></div>`)}else{draft=r.draft;receipt(r)}play(r.audio)}
+  else{r=await api("query",f);ph.remove();put(`<div class="card"><div class="q">${esc(r.transcript)}</div><div class="ans">${esc(r.answer)}</div></div>`);play(r.audio)}
+  load()}
+ catch(e){ph.remove();put(`<div class="card err">${esc(e.message)}</div>`)}
+ $("#mic").classList.remove("busy");$("#st").textContent=""}
+$("#form").onsubmit=e=>{e.preventDefault();const v=$("#txt").value.trim();if(v){$("#txt").value="";handle(null,v)}};
+$("#mic").onclick=async()=>{
+ if(rec){rec.stop();return}
+ let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true})}catch{$("#st").textContent="Please allow microphone access";return}
+ const mr=new MediaRecorder(st),ch=[],ac=new AudioContext(),an=ac.createAnalyser();an.fftSize=256;ac.createMediaStreamSource(st).connect(an);
+ const buf=new Uint8Array(an.fftSize);let raf;(function tick(){an.getByteTimeDomainData(buf);let s=0;for(const v of buf)s+=((v-128)/128)**2;$("#mic").style.setProperty("--lvl",Math.min(1,Math.sqrt(s/buf.length)*4));raf=requestAnimationFrame(tick)})();
+ mr.ondataavailable=e=>ch.push(e.data);
+ mr.onstop=()=>{cancelAnimationFrame(raf);ac.close();st.getTracks().forEach(t=>t.stop());rec=null;$("#mic").classList.remove("rec");$("#mic").style.setProperty("--lvl",0);$("#st").textContent="";
+  const b=new Blob(ch,{type:"audio/webm"});b.size>1500?handle(b):($("#st").textContent="Too short, try again")};
+ rec=mr;mr.start();$("#mic").classList.add("rec");$("#st").textContent="Listening… tap to finish"};
+addEventListener("keydown",e=>{if(e.code=="Space"&&document.activeElement.tagName!="INPUT"&&!$("#dock").hidden){e.preventDefault();$("#mic").click()}});
+async function ledger(){const[s,t]=await Promise.all([fetch("/api/summary?period=today").then(r=>r.json()),fetch("/api/transactions?period=week").then(r=>r.json())]);
+ const tot=Object.entries(s.totals);
+ $("#ledger").innerHTML=`<div class="lbl"><span>Today</span></div><div class="tiles">${tot.map(([k,v])=>`<div class="tile"><small>${k.replace("_"," ")}</small><b>₹${v.rupees.toLocaleString("en-IN")}</b> <small>${v.count} entries</small></div>`).join("")||'<div class="tile"><small>No entries yet</small><b>₹0</b></div>'}</div>
+ ${s.credit_balances.length?`<div class="lbl"><span>Credit owed to you</span></div><div class="card"><table>${s.credit_balances.map(c=>`<tr><td>${esc(c.name)}</td><td>₹${c.owes}</td></tr>`).join("")}</table></div>`:""}
+ <div class="lbl"><span>Last 7 days</span><a href="/api/export.csv">Export CSV</a></div><div class="card"><table>${t.map(r=>`<tr><td>${r.ts.slice(5,10)}<br><small style="color:var(--mute)">${r.ts.slice(11,16)}</small></td><td>${esc(r.customer||r.type.replace("_"," "))}<br><small style="color:var(--mute)">${r.items.map(i=>esc(i.name)).join(", ")}</small></td><td>₹${r.total_paise/100}</td></tr>`).join("")||"<tr><td>Nothing yet</td></tr>"}</table></div>`}
+load();empty();
+</script></body></html>
